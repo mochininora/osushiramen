@@ -1,194 +1,152 @@
-"use client"
+import tkinter as tk
+from tkinter import ttk, messagebox
+from datetime import datetime
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Trash2, Send } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+class PythonGUIApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("3つの入力セル GUI")
+        self.root.geometry("500x600")
+        
+        # 結果保存用リスト
+        self.results = []
+        
+        # メインフレーム
+        main_frame = ttk.Frame(root, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # タイトル
+        title_label = ttk.Label(main_frame, text="3つの入力セル GUI", font=("Arial", 16, "bold"))
+        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
+        
+        # セル1: 0.5刻みドロップダウン
+        ttk.Label(main_frame, text="入力セル1（数値選択 - 0.5刻み）:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.cell1_var = tk.StringVar()
+        self.cell1_combo = ttk.Combobox(main_frame, textvariable=self.cell1_var, width=25, state="readonly")
+        cell1_values = [str(i * 0.5 + 1) for i in range(47)]
+        self.cell1_combo['values'] = cell1_values
+        self.cell1_combo.grid(row=1, column=1, padx=(10, 0), pady=5)
+        
+        # セル2: テキスト入力
+        ttk.Label(main_frame, text="入力セル2:").grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.cell2_var = tk.StringVar()
+        self.cell2_entry = ttk.Entry(main_frame, textvariable=self.cell2_var, width=30)
+        self.cell2_entry.grid(row=2, column=1, padx=(10, 0), pady=5)
+        
+        # セル3: 1-24ドロップダウン
+        ttk.Label(main_frame, text="入力セル3（数値選択）:").grid(row=3, column=0, sticky=tk.W, pady=5)
+        self.cell3_var = tk.StringVar()
+        self.cell3_combo = ttk.Combobox(main_frame, textvariable=self.cell3_var, width=25, state="readonly")
+        cell3_values = [str(i) for i in range(1, 25)]
+        self.cell3_combo['values'] = cell3_values
+        self.cell3_combo.grid(row=3, column=1, padx=(10, 0), pady=5)
+        
+        # 入力状況表示
+        self.status_label = ttk.Label(main_frame, text="入力状況: 0/3 完了", foreground="blue")
+        self.status_label.grid(row=4, column=0, columnspan=2, pady=10)
+        
+        # ボタンフレーム
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=5, column=0, columnspan=2, pady=20)
+        
+        # 送信ボタン
+        self.submit_btn = ttk.Button(button_frame, text="送信", command=self.submit_data)
+        self.submit_btn.pack(side=tk.LEFT, padx=5)
+        
+        # クリアボタン
+        clear_btn = ttk.Button(button_frame, text="クリア", command=self.clear_data)
+        clear_btn.pack(side=tk.LEFT, padx=5)
+        
+        # 結果表示エリア
+        ttk.Label(main_frame, text="送信結果履歴:").grid(row=6, column=0, sticky=tk.W, pady=(20, 5))
+        
+        # テキストエリアとスクロールバー
+        text_frame = ttk.Frame(main_frame)
+        text_frame.grid(row=7, column=0, columnspan=2, pady=5, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        self.result_text = tk.Text(text_frame, height=12, width=50)
+        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=self.result_text.yview)
+        self.result_text.configure(yscrollcommand=scrollbar.set)
+        
+        self.result_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # 入力変更時のイベントバインド
+        self.cell1_var.trace('w', self.update_status)
+        self.cell2_var.trace('w', self.update_status)
+        self.cell3_var.trace('w', self.update_status)
+        
+        # グリッドの重み設定
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(7, weight=1)
+    
+    def update_status(self, *args):
+        """入力状況を更新"""
+        filled_count = 0
+        if self.cell1_var.get(): filled_count += 1
+        if self.cell2_var.get().strip(): filled_count += 1
+        if self.cell3_var.get(): filled_count += 1
+        
+        self.status_label.config(text=f"入力状況: {filled_count}/3 完了")
+        
+        # 送信ボタンの有効/無効切り替え
+        if filled_count == 3:
+            self.submit_btn.config(state="normal")
+        else:
+            self.submit_btn.config(state="disabled")
+    
+    def submit_data(self):
+        """データ送信処理"""
+        cell1 = self.cell1_var.get()
+        cell2 = self.cell2_var.get().strip()
+        cell3 = self.cell3_var.get()
+        
+        if not cell1 or not cell2 or not cell3:
+            messagebox.showwarning("警告", "すべてのセルに入力してください。")
+            return
+        
+        # 結果を保存
+        result = {
+            "cell1": cell1,
+            "cell2": cell2,
+            "cell3": cell3,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        self.results.append(result)
+        
+        # 結果をテキストエリアに表示
+        result_text = f"--- 送信 #{len(self.results)} ---\n"
+        result_text += f"時刻: {result['timestamp']}\n"
+        result_text += f"セル1: {result['cell1']}\n"
+        result_text += f"セル2: {result['cell2']}\n"
+        result_text += f"セル3: {result['cell3']}\n"
+        result_text += "=" * 30 + "\n\n"
+        
+        self.result_text.insert(tk.END, result_text)
+        self.result_text.see(tk.END)
+        
+        print(f"送信されたデータ: {result}")
+        messagebox.showinfo("成功", "データが送信されました！")
+    
+    def clear_data(self):
+        """データクリア処理"""
+        self.cell1_var.set("")
+        self.cell2_var.set("")
+        self.cell3_var.set("")
+        self.results.clear()
+        self.result_text.delete(1.0, tk.END)
+        print("データがクリアされました")
 
-interface SubmissionResult {
-  cell1: string
-  cell2: string
-  cell3: string
-  timestamp: string
-  totalChars: number
-}
+def main():
+    root = tk.Tk()
+    app = PythonGUIApp(root)
+    
+    print("Python GUIアプリケーションを起動しています...")
+    print("3つのセルに入力して、送信ボタンを押してください。")
+    
+    root.mainloop()
 
-export default function WebGUIApp() {
-  const [cell1, setCell1] = useState("")
-  const [cell2, setCell2] = useState("")
-  const [cell3, setCell3] = useState("")
-  const [results, setResults] = useState<SubmissionResult[]>([])
-
-  const isAllFieldsFilled = cell1.trim() && cell2.trim() && cell3.trim()
-
-  const handleSubmit = () => {
-    if (!cell1.trim() || !cell2.trim() || !cell3.trim()) {
-      alert("すべてのセルに入力してください。")
-      return
-    }
-
-    const newResult: SubmissionResult = {
-      cell1: cell1.trim(),
-      cell2: cell2.trim(),
-      cell3: cell3.trim(),
-      timestamp: new Date().toLocaleString("ja-JP"),
-      totalChars: cell1.length + cell2.length + cell3.length,
-    }
-
-    setResults((prev) => [...prev, newResult])
-    console.log("送信されたデータ:", newResult)
-  }
-
-  const handleClear = () => {
-    setCell1("")
-    setCell2("")
-    setCell3("")
-    setResults([])
-    console.log("データがクリアされました")
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* ヘッダー */}
-        <div className="text-center py-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">3つの入力セル Web GUI</h1>
-          <p className="text-gray-600">3つのセルに文字を入力して送信してください</p>
-        </div>
-
-        {/* 入力フォーム */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5" />
-              データ入力
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* 入力セル1 - ドロップダウン（0.5刻み） */}
-            <div className="space-y-2">
-              <Label htmlFor="cell1">入力セル1（数値選択 - 0.5刻み）</Label>
-              <Select value={cell1} onValueChange={setCell1}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="通知したい使用時間を選択してください" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 47 }, (_, i) => i * 0.5 + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-gray-500">選択された値: {cell1 || "未選択"}</p>
-            </div>
-
-            {/* 入力セル2 */}
-            <div className="space-y-2">
-              <Label htmlFor="cell2">入力セル2</Label>
-              <Input
-                id="cell2"
-                value={cell2}
-                onChange={(e) => setCell2(e.target.value)}
-                placeholder="ここに入力してください..."
-                className="w-full"
-              />
-              <p className="text-sm text-gray-500">文字数: {cell2.length}</p>
-            </div>
-
-            {/* 入力セル3 - ドロップダウン */}
-            <div className="space-y-2">
-              <Label htmlFor="cell3">入力セル3（数値選択）</Label>
-              <Select value={cell3} onValueChange={setCell3}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="リセットする時間を選択してください" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-gray-500">選択された値: {cell3 || "未選択"}</p>
-            </div>
-
-            <Separator />
-
-            {/* 合計文字数 */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm font-medium text-gray-700">
-                合計文字数: {(cell1 ? cell1.length : 0) + cell2.length + (cell3 ? cell3.length : 0)}
-              </p>
-            </div>
-
-            {/* 入力状況表示 */}
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-700">
-                入力状況: {[cell1, cell2, cell3].filter((cell) => cell.trim()).length}/3 完了
-              </p>
-              {!isAllFieldsFilled && <p className="text-xs text-blue-600 mt-1">すべてのセルに入力すると送信できます</p>}
-            </div>
-
-            {/* ボタン */}
-            <div className="flex gap-3 pt-4">
-              <Button onClick={handleSubmit} className="flex-1" size="lg" disabled={!isAllFieldsFilled}>
-                <Send className="h-4 w-4 mr-2" />
-                送信
-              </Button>
-              <Button onClick={handleClear} variant="outline" size="lg" className="flex-1 bg-transparent">
-                <Trash2 className="h-4 w-4 mr-2" />
-                クリア
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 結果表示 */}
-        {results.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>送信結果履歴</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {results.map((result, index) => (
-                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex justify-between items-start mb-3">
-                      <h4 className="font-semibold text-gray-900">送信 #{results.length - index}</h4>
-                      <span className="text-sm text-gray-500">{result.timestamp}</span>
-                    </div>
-
-                    <div className="grid gap-2 text-sm">
-                      <div>
-                        <span className="font-medium text-gray-700">セル1:</span>{" "}
-                        <span className="text-gray-900">{result.cell1 || "(空)"}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">セル2:</span>{" "}
-                        <span className="text-gray-900">{result.cell2 || "(空)"}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">セル3:</span>{" "}
-                        <span className="text-gray-900">{result.cell3 || "(空)"}</span>
-                      </div>
-                      <div className="pt-2 border-t">
-                        <span className="font-medium text-gray-700">合計文字数:</span>{" "}
-                        <span className="font-semibold text-blue-600">{result.totalChars}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
-  )
-}
+if __name__ == "__main__":
+    main()
