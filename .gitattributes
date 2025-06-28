@@ -23,9 +23,11 @@ export default function WebGUIApp() {
   const [cell3, setCell3] = useState("")
   const [results, setResults] = useState<SubmissionResult[]>([])
 
+  const isAllFieldsFilled = cell1.trim() && cell2.trim() && cell3.trim()
+
   const handleSubmit = () => {
-    if (!cell1.trim() && !cell2.trim() && !cell3.trim()) {
-      alert("少なくとも1つのセルに入力してください。")
+    if (!cell1.trim() || !cell2.trim() || !cell3.trim()) {
+      alert("すべてのセルに入力してください。")
       return
     }
 
@@ -72,7 +74,7 @@ export default function WebGUIApp() {
               <Label htmlFor="cell1">入力セル1（数値選択 - 0.5刻み）</Label>
               <Select value={cell1} onValueChange={setCell1}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="1から24の数値を選択してください（0.5刻み）" />
+                  <SelectValue placeholder="通知したい使用時間を選択してください" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 47 }, (_, i) => i * 0.5 + 1).map((num) => (
@@ -103,7 +105,7 @@ export default function WebGUIApp() {
               <Label htmlFor="cell3">入力セル3（数値選択）</Label>
               <Select value={cell3} onValueChange={setCell3}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="1から24の数値を選択してください" />
+                  <SelectValue placeholder="リセットする時間を選択してください" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 24 }, (_, i) => i + 1).map((num) => (
@@ -125,9 +127,17 @@ export default function WebGUIApp() {
               </p>
             </div>
 
+            {/* 入力状況表示 */}
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-700">
+                入力状況: {[cell1, cell2, cell3].filter((cell) => cell.trim()).length}/3 完了
+              </p>
+              {!isAllFieldsFilled && <p className="text-xs text-blue-600 mt-1">すべてのセルに入力すると送信できます</p>}
+            </div>
+
             {/* ボタン */}
             <div className="flex gap-3 pt-4">
-              <Button onClick={handleSubmit} className="flex-1" size="lg">
+              <Button onClick={handleSubmit} className="flex-1" size="lg" disabled={!isAllFieldsFilled}>
                 <Send className="h-4 w-4 mr-2" />
                 送信
               </Button>
