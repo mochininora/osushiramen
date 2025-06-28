@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Trash2, Send } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface SubmissionResult {
   cell1: string
@@ -66,17 +67,22 @@ export default function WebGUIApp() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* 入力セル1 */}
+            {/* 入力セル1 - ドロップダウン（0.5刻み） */}
             <div className="space-y-2">
-              <Label htmlFor="cell1">入力セル1</Label>
-              <Input
-                id="cell1"
-                value={cell1}
-                onChange={(e) => setCell1(e.target.value)}
-                placeholder="ここに入力してください..."
-                className="w-full"
-              />
-              <p className="text-sm text-gray-500">文字数: {cell1.length}</p>
+              <Label htmlFor="cell1">入力セル1（数値選択 - 0.5刻み）</Label>
+              <Select value={cell1} onValueChange={setCell1}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="1から24の数値を選択してください（0.5刻み）" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 47 }, (_, i) => i * 0.5 + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">選択された値: {cell1 || "未選択"}</p>
             </div>
 
             {/* 入力セル2 */}
@@ -92,17 +98,22 @@ export default function WebGUIApp() {
               <p className="text-sm text-gray-500">文字数: {cell2.length}</p>
             </div>
 
-            {/* 入力セル3 */}
+            {/* 入力セル3 - ドロップダウン */}
             <div className="space-y-2">
-              <Label htmlFor="cell3">入力セル3</Label>
-              <Input
-                id="cell3"
-                value={cell3}
-                onChange={(e) => setCell3(e.target.value)}
-                placeholder="ここに入力してください..."
-                className="w-full"
-              />
-              <p className="text-sm text-gray-500">文字数: {cell3.length}</p>
+              <Label htmlFor="cell3">入力セル3（数値選択）</Label>
+              <Select value={cell3} onValueChange={setCell3}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="1から24の数値を選択してください" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">選択された値: {cell3 || "未選択"}</p>
             </div>
 
             <Separator />
@@ -110,7 +121,7 @@ export default function WebGUIApp() {
             {/* 合計文字数 */}
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-sm font-medium text-gray-700">
-                合計文字数: {cell1.length + cell2.length + cell3.length}
+                合計文字数: {(cell1 ? cell1.length : 0) + cell2.length + (cell3 ? cell3.length : 0)}
               </p>
             </div>
 
