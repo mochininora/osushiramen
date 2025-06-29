@@ -148,7 +148,6 @@ def main():
     
     root.mainloop()
 
-<<<<<<< HEAD
 export default function WebGUIApp() {
   const [cell1, setCell1] = useState("")
   const [cell2, setCell2] = useState("")
@@ -203,7 +202,7 @@ export default function WebGUIApp() {
           <CardContent className="space-y-4">
             {/* 入力セル1 - ドロップダウン（0.5刻み） */}
             <div className="space-y-2">
-              <Label htmlFor="cell1">入力セル1（数値選択 - 0.5刻み）</Label>
+              <Label htmlFor="cell1">使用時間を設定してください</Label>
               <Select value={cell1} onValueChange={setCell1}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="1から24の数値を選択してください（0.5刻み）" />
@@ -221,7 +220,7 @@ export default function WebGUIApp() {
 
             {/* 入力セル2 */}
             <div className="space-y-2">
-              <Label htmlFor="cell2">入力セル2</Label>
+              <Label htmlFor="cell2">次にすべきことを入力してください</Label>
               <Input
                 id="cell2"
                 value={cell2}
@@ -234,7 +233,7 @@ export default function WebGUIApp() {
 
             {/* 入力セル3 - ドロップダウン */}
             <div className="space-y-2">
-              <Label htmlFor="cell3">入力セル3（数値選択）</Label>
+              <Label htmlFor="cell3">リセットする時間を設定してください</Label>
               <Select value={cell3} onValueChange={setCell3}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="1から24の数値を選択してください" />
@@ -324,7 +323,3 @@ export default function WebGUIApp() {
     </div>
   )
 }
-=======
-if __name__ == "__main__":
-    main()
->>>>>>> front
