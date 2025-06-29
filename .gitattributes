@@ -148,5 +148,178 @@ def main():
     
     root.mainloop()
 
-if __name__ == "__main__":
-    main()
+export default function WebGUIApp() {
+  const [cell1, setCell1] = useState("")
+  const [cell2, setCell2] = useState("")
+  const [cell3, setCell3] = useState("")
+  const [results, setResults] = useState<SubmissionResult[]>([])
+
+  const isAllFieldsFilled = cell1.trim() && cell2.trim() && cell3.trim()
+
+  const handleSubmit = () => {
+    if (!cell1.trim() || !cell2.trim() || !cell3.trim()) {
+      alert("すべてのセルに入力してください。")
+      return
+    }
+
+    const newResult: SubmissionResult = {
+      cell1: cell1.trim(),
+      cell2: cell2.trim(),
+      cell3: cell3.trim(),
+      timestamp: new Date().toLocaleString("ja-JP"),
+      totalChars: cell1.length + cell2.length + cell3.length,
+    }
+
+    setResults((prev) => [...prev, newResult])
+    console.log("送信されたデータ:", newResult)
+  }
+
+  const handleClear = () => {
+    setCell1("")
+    setCell2("")
+    setCell3("")
+    setResults([])
+    console.log("データがクリアされました")
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* ヘッダー */}
+        <div className="text-center py-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">3つの入力セル Web GUI</h1>
+          <p className="text-gray-600">3つのセルに文字を入力して送信してください</p>
+        </div>
+
+        {/* 入力フォーム */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5" />
+              データ入力
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* 入力セル1 - ドロップダウン（0.5刻み） */}
+            <div className="space-y-2">
+              <Label htmlFor="cell1">入力セル1（数値選択 - 0.5刻み）</Label>
+              <Select value={cell1} onValueChange={setCell1}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="1から24の数値を選択してください（0.5刻み）" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 47 }, (_, i) => i * 0.5 + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">選択された値: {cell1 || "未選択"}</p>
+            </div>
+
+            {/* 入力セル2 */}
+            <div className="space-y-2">
+              <Label htmlFor="cell2">入力セル2</Label>
+              <Input
+                id="cell2"
+                value={cell2}
+                onChange={(e) => setCell2(e.target.value)}
+                placeholder="ここに入力してください..."
+                className="w-full"
+              />
+              <p className="text-sm text-gray-500">文字数: {cell2.length}</p>
+            </div>
+
+            {/* 入力セル3 - ドロップダウン */}
+            <div className="space-y-2">
+              <Label htmlFor="cell3">入力セル3（数値選択）</Label>
+              <Select value={cell3} onValueChange={setCell3}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="1から24の数値を選択してください" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">選択された値: {cell3 || "未選択"}</p>
+            </div>
+
+            <Separator />
+
+            {/* 合計文字数 */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium text-gray-700">
+                合計文字数: {(cell1 ? cell1.length : 0) + cell2.length + (cell3 ? cell3.length : 0)}
+              </p>
+            </div>
+
+            {/* 入力状況表示 */}
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-700">
+                入力状況: {[cell1, cell2, cell3].filter((cell) => cell.trim()).length}/3 完了
+              </p>
+              {!isAllFieldsFilled && <p className="text-xs text-blue-600 mt-1">すべてのセルに入力すると送信できます</p>}
+            </div>
+
+            {/* ボタン */}
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleSubmit} className="flex-1" size="lg" disabled={!isAllFieldsFilled}>
+                <Send className="h-4 w-4 mr-2" />
+                送信
+              </Button>
+              <Button onClick={handleClear} variant="outline" size="lg" className="flex-1 bg-transparent">
+                <Trash2 className="h-4 w-4 mr-2" />
+                クリア
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 結果表示 */}
+        {results.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>送信結果履歴</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {results.map((result, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <h4 className="font-semibold text-gray-900">送信 #{results.length - index}</h4>
+                      <span className="text-sm text-gray-500">{result.timestamp}</span>
+                    </div>
+
+                    <div className="grid gap-2 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">セル1:</span>{" "}
+                        <span className="text-gray-900">{result.cell1 || "(空)"}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">セル2:</span>{" "}
+                        <span className="text-gray-900">{result.cell2 || "(空)"}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">セル3:</span>{" "}
+                        <span className="text-gray-900">{result.cell3 || "(空)"}</span>
+                      </div>
+                      <div className="pt-2 border-t">
+                        <span className="font-medium text-gray-700">合計文字数:</span>{" "}
+                        <span className="font-semibold text-blue-600">{result.totalChars}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  )
+}
