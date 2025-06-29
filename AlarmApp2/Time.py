@@ -11,7 +11,7 @@ from plyer import notification
 from shared import shared_data, data_lock, flag
 
 
-bucket_id = 'aw-watcher-window_LAPTOP-5A2GDQCB'
+bucket_id = 'aw-watcher-window_mochininora'
 TARGET_APP_NAME = 'msedge.exe'
 jst = timezone(timedelta(hours=9))
 
